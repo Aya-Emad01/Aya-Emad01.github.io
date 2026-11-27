@@ -1,6 +1,29 @@
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');if(e.target.dataset.n)cnt(e.target);io.unobserve(e.target)}}),{threshold:.15});
-document.querySelectorAll('.rv,.stat').forEach(e=>{e.classList.add('rv');io.observe(e)});
-function cnt(el){const b=el.querySelector('b');if(!b||b.dataset.d)return;b.dataset.d=1;const n=+b.dataset.nn,s=b.dataset.s||'',t=performance.now();(function f(x){const p=Math.min(1,(x-t)/1600),v=Math.round(n*(1-Math.pow(1-p,4)));b.textContent=v+s;if(p<1)requestAnimationFrame(f)})(t)}
-document.querySelectorAll('.stat').forEach(s=>{s.dataset.n=1});
-const pr=document.getElementById('prog'),rg=document.getElementById('ridge');
-addEventListener('scroll',()=>{const h=document.documentElement;pr.style.width=(scrollY/(h.scrollHeight-innerHeight)*100)+'%';rg.style.transform='translateY('+(scrollY*.35)+'px)';rg.style.opacity=Math.max(0,1-scrollY/innerHeight*1.1)},{passive:true});
+const menuButton = document.querySelector('.menu-toggle');
+const menu = document.querySelector('.nav-links');
+function closeMenu() {
+  menuButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-label', 'Open navigation');
+  menu.classList.remove('open');
+}
+menuButton.addEventListener('click', () => {
+  const open = menuButton.getAttribute('aria-expanded') === 'true';
+  menuButton.setAttribute('aria-expanded', String(!open));
+  menuButton.setAttribute('aria-label', open ? 'Open navigation' : 'Close navigation');
+  menu.classList.toggle('open', !open);
+});
+menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeMenu();
+});
+const navLinks = [...menu.querySelectorAll('a[href^="#"]')];
+const sections = navLinks.map((link) => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+const currentSection = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    navLinks.forEach((link) => {
+      if (link.hash === `#${entry.target.id}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach((section) => currentSection.observe(section));
